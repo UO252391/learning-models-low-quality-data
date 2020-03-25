@@ -5,8 +5,8 @@ from statistics import mean
 
 # import numpy
 # import percentile as percentile
-import reshape as reshape
-import tile as tile
+import reshape
+# import tile
 import numpy as np
 # from scipy.signal import butter, lfilter, freqz
 # from scipy.optimize import fmin
@@ -15,7 +15,7 @@ import numpy as np
 # import copy
 # from timeit import default_timer as timer
 # import matplotlib.pyplot as plt
-from operator import attrgetter#, itemgetter, methodcaller
+from operator import attrgetter  # , itemgetter, methodcaller
 
 # import sys
 
@@ -55,7 +55,7 @@ for i in range(maxdatos):
 datos = array(datos)
 
 # Test sobre datos sin ruido
-f = open("..\\50sin-noiseless.dat")
+f = open("..\\resources\\50sin-noiseless.dat")
 datostest = f.readlines()
 f.close()
 for i in range(maxdatos):
@@ -67,8 +67,9 @@ datostest = array(datostest)
 
 
 def purgeNaNs(prediccion):
-	where_are_NaNs = isnan(prediccion)
-	prediccion[where_are_NaNs] = 10
+	np_prediccion = np.fromstring(prediccion)
+	where_are_NaNs = isnan(np_prediccion)
+	np_prediccion[where_are_NaNs] = 10
 
 
 def trans(M):
@@ -76,16 +77,54 @@ def trans(M):
 
 
 def myFRBS(vx, cons, baseX, sigmaX, mygran, mydimx):
-	res = trans(reshape(tile(vx, mygran), [mygran, mydimx])) - reshape(tile(baseX, mydimx), [mydimx, mygran])
-	activacion = exp(-np.square(res) / abs(sigmaX))
-	activcons = activacion * reshape(tile(cons, mydimx), [mydimx, mygran])
-	return sum(activcons, 1) / (sum(activacion, 1) + 1e-6)
+	# TODO: refactor call to see what's wrong
+	print("Argumentos: ")
+	print(vx)
+	print(cons)
+	print(baseX)
+	print(sigmaX)
+	print(mygran)
+	print(mydimx)
+	tile1 = np.tile(vx, mygran) # 50 - 10
+	print(tile1.shape)
+	shape1 = np.reshape(tile1, [mygran, mydimx]) # 10 - 50
+	transpose = trans(shape1) # 50 -10
+	tile2 = np.tile(baseX, mydimx)
+	shape2 = np.reshape(tile2, (mydimx, mygran))
+	print("Transpose")
+	print(transpose)
+	print("Shape2")
+	print(shape2.shape)
+	res = transpose - shape2
+	activacion = np.exp(-np.square(res) / abs(sigmaX))
+	print("Activacion")
+	print(activacion)
+	tile3 = np.tile(cons, mydimx)
+	shape3 = np.reshape(tile3, [mydimx, mygran])
+	activcons = activacion * shape3
+	print("Activcons")
+	print(activcons)
+	sum1 = sum(activcons, 1)
+	sum11 = np.matrix(activcons)
+	sum2 = sum(activacion, 1) + 1e-6
+	sum22 = np.matrix(activacion)
+	print("Matrices")
+	print(sum11.shape)
+	print(sum22.shape)
+	result1 = sum11.sum(axis=1) + 1
+	result2 = sum22.sum(axis=1) + 1 + 1e-6
+	#result = sum(activcons, 1) / (sum(activacion, 1) + 1e-6) ----> Original
+	result = result1 / result2
+	result = np.fromstring(result)
+	print("Result")
+	print(result)
+	return result
 
 
 def deltacrisp(params, observed):
 	prediccion = myFRBS(datos[:, 0], params[0:mygran], params[mygran:2 * mygran], params[2 * mygran:3 * mygran], mygran,
 						mydimx)
-	purgeNaNs(prediccion)
+	#purgeNaNs(prediccion)
 	return prediccion - observed
 
 
@@ -101,7 +140,7 @@ def K(x, c):
 
 
 def Kg(x, c):
-	t = exp(-np.square(x / c))
+	t = np.exp(-np.square(x / c))
 	return sum(t)
 
 
@@ -136,7 +175,8 @@ def comparaciones2a2(POPULATION, poblacion, comparator, c):
 		for ind2 in range(individual, POPULATION):
 			comparaciones[ind2, individual] = comparator(poblacion[individual].delta, poblacion[ind2].delta, c)
 			comparaciones[individual, ind2] = comparator(poblacion[ind2].delta, poblacion[individual].delta, c)
-			distancias[ind2, individual] = np.sqrt(sum(np.square(poblacion[ind2].genoma - poblacion[individual].genoma)))
+			distancias[ind2, individual] = np.sqrt(
+				sum(np.square(poblacion[ind2].genoma - poblacion[individual].genoma)))
 			distancias[individual, ind2] = distancias[ind2, individual]
 	return comparaciones, distancias
 
@@ -200,13 +240,25 @@ def optimLocal(start, delta, comparator, observed, NITER, c):
 	iter = 0
 	lastvar = 0
 	while iter <= MAXITER:
+		print(iter)
+		print(MAXITER)
 		if iter == 0:
 			savefit = mean(np.square(simplex[0].delta))
 		if iter % 10 == 0:
 			var = varianza(simplex)
-			print("     ** it=", iter, "bst=", mean(np.square(simplex[0].delta)), "Descub=",
-				  # percentile(simplex[0].delta, array([5, 95])), ----> TODO Percentile is not callable
-				  "K=", Kg(simplex[0].delta, c), "(var", var, ")")
+			# print("     ** it=", iter, "bst=", mean(np.square(simplex[0].delta)), "Descub=",
+			# 	  np.percentile(simplex[0].delta, array([5, 95])),
+			# 	  "K=", Kg(simplex[0].delta, c), "(var", var, ")")
+		iter = iter + 1
+	print("--------------------------------------------------")
+	print("--------------------------------------------------")
+	print("------                                    --------")
+	print("------                                    --------")
+	print("------              MARCADOR              --------")
+	print("------                                    --------")
+	print("------                                    --------")
+	print("--------------------------------------------------")
+	print("--------------------------------------------------")
 
 	if var == lastvar:
 		print("Saliendo por varianza constante")
@@ -435,7 +487,7 @@ def genetico(POPULATION, start, delta, comparator, observed, NITER, c):
 		print('ITER=', gen,
 			  "MSE=", mean(np.square(poblacion[0].delta)),
 			  "MAS=", mean(abs(poblacion[0].delta)),
-			  # "Desc=", percentile(poblacion[0].delta, array([5, 95])) ----> TODO: Percentile is not callable
+			  "Desc=", np.percentile(poblacion[0].delta, array([5, 95]))
 			  )
 
 		f = open('params-crisp.dat', 'w')
@@ -479,12 +531,18 @@ c = 0.25
 for rep in range(1):
 	prediccion = myFRBS(datos[:, 0], params[0:mygran], params[mygran:2 * mygran], params[2 * mygran:3 * mygran], mygran,
 						mydimx)
+	print("Prediccion")
+	print(prediccion)
+	print("Datos")
+	print(datos[:, 1])
 	delta = prediccion - datos[:, 1]
-	# print("Numero de puntos cubiertos:", percentile(delta, array([5, 95]))) ----> TODO: Percentile is not callable
+	print("Numero de puntos cubiertos:", np.percentile(delta, array([5, 95]))) #----> TODO: Percentile is not callable
 	solucion = genetico(POP, params, deltacrisp, comparaMSE, datos[:, 1], NITER, c)
 	# solucion = genetico(POP,params,deltacrisp,comparaStatPref,datos[:,1],NITER,c)
 	solucion = genetico(POP, params, deltacrisp, comparaStochDom, datos[:, 1], NITER, c)
 	params = solucion
+	print("Solucion")
+	print(solucion)
 
 # x <- read.table("output-crisp.dat")
 # plot(x[,1],x[,2],ylim=c(min(x[,2]),max(x[,2])),xlab="independent variable",ylab="observed variable")
