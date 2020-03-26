@@ -1,43 +1,10 @@
 import math
 import random
-from cmath import isnan
-from math import exp
-from statistics import mean
-
-# import numpy
-# import percentile as percentile
-import reshape
-# import tile
 import numpy as np
-# from scipy.signal import butter, lfilter, freqz
-# from scipy.optimize import fmin
-# from scipy.stats import norm
-# import scipy.optimize as so
-# import copy
-# from timeit import default_timer as timer
-# import matplotlib.pyplot as plt
-from operator import attrgetter  # , itemgetter, methodcaller
-
-# import sys
-
-# > x <- 1:50
-# > y <- sin(x/20)
-# > plot(x,y)
-# > ruido <- runif(50,-0.1,0.1)
-# > outliers <- sample(x,2)
-# > ruido3 <- ruido
-# > ruido3[outliers] <- runif(2,-1,1)
-# > plot(x,y+ruido3)
-# > write.table(cbind(x,y),"50sin-noiseless.dat",row.names=F,col.names=F)
-# > write.table(cbind(x,y+ruido3),"50sin-noise.dat",row.names=F,col.names=F)
-# > width <- runif(50,0,0.25)
-# > write.table(cbind(x,y+ruido3-width,y+ruido3+width),"50sin-interval.dat",row.names=F,col.names=F)
-# > x <- read.table("50sin-noise.dat")
-# > plot(x[,1],x[,2],ylim=c(min(x[,2]),max(x[,2])),xlab="independent variable",ylab="observed variable")
-# > x <- read.table("50sin-interval.dat")
-# > plot(x[,1],x[,3],ylim=c(min(x[,2]),max(x[,3])),xlab="independent variable",ylab="observed variable",type="n")
-# > arrows(x[,1],x[,2],x[,1],x[,3],angle=90,code=3,length=0.02)
+from operator import attrgetter
+from statistics import mean
 from numpy.core._multiarray_umath import array
+
 
 f = open("..\\resources\\50sin-noise.dat")
 datos = f.readlines()
@@ -69,14 +36,9 @@ datostest = array(datostest)
 
 def purgeNaNs(prediccion):
 	np_prediccion = np.fromstring(prediccion)
-	# np_prediccion = np.array(np_prediccion)
-	#nans = []
 	for i in range(np_prediccion.ndim):
 		if math.isnan(np_prediccion[i]):
 			np_prediccion[i] = 10
-			# nans.append(True)
-	#where_are_NaNs = math.isnan(np_prediccion)
-	# np_prediccion[nans] = 10
 
 
 def trans(M):
@@ -84,47 +46,25 @@ def trans(M):
 
 
 def myFRBS(vx, cons, baseX, sigmaX, mygran, mydimx):
-	# TODO: refactor call to see what's wrong
-	# print("Argumentos: ")
-	# print(vx)
-	# print(cons)
-	# print(baseX)
-	# print(sigmaX)
-	# print(mygran)
-	# print(mydimx)
 	tile1 = np.tile(vx, mygran) # 50 - 10
-	# print(tile1.shape)
 	shape1 = np.reshape(tile1, [mygran, mydimx]) # 10 - 50
 	transpose = trans(shape1) # 50 -10
 	tile2 = np.tile(baseX, mydimx)
 	shape2 = np.reshape(tile2, (mydimx, mygran))
-	# print("Transpose")
-	# print(transpose)
-	# print("Shape2")
-	# print(shape2.shape)
 	res = transpose - shape2
 	activacion = np.exp(-np.square(res) / abs(sigmaX))
-	# print("Activacion")
-	# print(activacion)
 	tile3 = np.tile(cons, mydimx)
 	shape3 = np.reshape(tile3, [mydimx, mygran])
 	activcons = activacion * shape3
-	# print("Activcons")
-	# print(activcons)
 	sum1 = sum(activcons, 1)
 	sum11 = np.matrix(activcons)
 	sum2 = sum(activacion, 1) + 1e-6
 	sum22 = np.matrix(activacion)
-	# print("Matrices")
-	# print(sum11.shape)
-	# print(sum22.shape)
 	result1 = sum11.sum(axis=1) + 1
 	result2 = sum22.sum(axis=1) + 1 + 1e-6
-	#result = sum(activcons, 1) / (sum(activacion, 1) + 1e-6) ----> Original
 	result = result1 / result2
 	result = np.fromstring(result)
-	# print("Result")
-	# print(result)
+
 	return result
 
 
@@ -178,7 +118,7 @@ def comparaciones2a2(POPULATION, poblacion, comparator, c):
 	comparaciones = np.zeros([POPULATION, POPULATION])
 	distancias = np.zeros([POPULATION, POPULATION])
 	for individual in range(POPULATION):
-		# print "ECM(",individual,")=",mean(square(poblacion[individual].delta))
+		print("ECM(", individual, ")=", np.mean(np.square(poblacion[individual].delta)))
 		for ind2 in range(individual, POPULATION):
 			comparaciones[ind2, individual] = comparator(poblacion[individual].delta, poblacion[ind2].delta, c)
 			comparaciones[individual, ind2] = comparator(poblacion[ind2].delta, poblacion[individual].delta, c)
@@ -192,24 +132,18 @@ def ordenapreferencias(POPULATION, poblacion, comparaciones, distancias):
 	for individual in range(POPULATION):
 		poblacion[individual].rank = sum(comparaciones[individual, :])
 		poblacion[individual].distancia = 1.0 / sum(distancias[individual, :])
-	# print individual," antes sort=",comparaciones[individual,:],"rango=",poblacion[individual].rank
+	print(individual, " antes sort=", comparaciones[individual, :], "rango=", poblacion[individual].rank)
 	poblacion.sort(key=attrgetter('rank', 'distancia'))
 
-
-# for individual in range(POPULATION):
-# print individual," despues sort: rango=",poblacion[individual].rank
 
 def ordenaSimplex(POPULATION, poblacion, comparaciones, distancias):
 	for individual in range(POPULATION):
 		poblacion[individual].rank = sum(comparaciones[individual, :])
 		# Como segundo criterio ponemos el MSE de los centros
 		poblacion[individual].distancia = mean(np.square(poblacion[individual].delta))
-	# print individual," antes sort=",comparaciones[individual,:],"rango=",poblacion[individual].rank
+	print(individual, " antes sort=", comparaciones[individual, :], "rango=", poblacion[individual].rank)
 	poblacion.sort(key=attrgetter('rank', 'distancia'))
 
-
-# for individual in range(POPULATION):
-# print individual," despues sort: rango=",poblacion[individual].rank
 
 def varianza(simplex):
 	xo = simplex[0].genoma
@@ -220,7 +154,7 @@ def varianza(simplex):
 	for i in range(1, len(simplex)):
 		v = v + np.square(simplex[i].genoma - xo)
 	v = 1.0 / len(simplex) * v
-	# print "v=", sqrt(dot(v,v))
+	print("v=", np.sqrt(np.dot(v, v)))
 	return np.sqrt(np.dot(v, v))
 
 
@@ -247,32 +181,20 @@ def optimLocal(start, delta, comparator, observed, NITER, c):
 	iter = 0
 	lastvar = 0
 	while iter <= MAXITER:
-		# print(iter)
-		# print(MAXITER)
 		if iter == 0:
 			savefit = mean(np.square(simplex[0].delta))
 		if iter % 10 == 0:
 			var = varianza(simplex)
-			# print("     ** it=", iter, "bst=", mean(np.square(simplex[0].delta)), "Descub=",
-			# 	  np.percentile(simplex[0].delta, array([5, 95])),
-			# 	  "K=", Kg(simplex[0].delta, c), "(var", var, ")")
+			print("     ** it=", iter, "bst=", mean(np.square(simplex[0].delta)), "Descub=",
+				  np.percentile(simplex[0].delta, array([5, 95])),
+				  "K=", Kg(simplex[0].delta, c), "(var", var, ")")
 		iter = iter + 1
-	# print("--------------------------------------------------")
-	# print("--------------------------------------------------")
-	# print("------                                    --------")
-	# print("------                                    --------")
-	# print("------              MARCADOR              --------")
-	# print("------                                    --------")
-	# print("------                                    --------")
-	# print("--------------------------------------------------")
-	# print("--------------------------------------------------")
 
 	if var == lastvar:
 		print("Saliendo por varianza constante")
 		MAXITER = iter - 1
 		lastvar = var
 		if iter == MAXITER and var > 0.05 and MAXITER < 400:
-			# print "Continuando por varianza"
 			MAXITER = MAXITER + 10
 		else:
 			if var < 1e-4:
@@ -282,12 +204,7 @@ def optimLocal(start, delta, comparator, observed, NITER, c):
 
 		comparaciones, distancias = comparaciones2a2(N1, simplex, comparator, c)
 		ordenaSimplex(N1, simplex, comparaciones, distancias)
-		#
-		# Depuracion
-		#
-		# print "ITER=",iter," Best:", meanf(vsquaref(simplex[0].delta))
-		# for individual in range(N1):
-		#	print individual,simplex[individual].rank, meanf(vsquaref(simplex[individual].delta))
+
 		# Centroide de todos los puntos menos el peor (2)
 		xn1 = simplex[N].genoma
 		xo = simplex[0].genoma
@@ -302,7 +219,7 @@ def optimLocal(start, delta, comparator, observed, NITER, c):
 		betterbst = comparator(deltaxr, simplex[0].delta, c)
 		if better2w and not betterbst:
 			simplex[N] = cromosoma(xr, 0, deltaxr, 0)
-		# print "Elegido el reflejado: xr=",xr," MSE=",mean(square(deltaxr))
+			print("Elegido el reflejado: xr=", xr, " MSE=", np.mean(np.square(deltaxr)))
 		else:
 			if betterbst:  # Expansion (4)
 				xe = xr + gamma * (xr - xo)
@@ -310,24 +227,23 @@ def optimLocal(start, delta, comparator, observed, NITER, c):
 				bettere = comparator(deltaxe, deltaxr, c)
 				if bettere:
 					simplex[N] = cromosoma(xe, 0, deltaxe, 0)
-				# print "Elegido el expandido: xe=",xe," MSE=",mean(square(deltaxe))
+					print("Elegido el expandido: xe=", xe, " MSE=", np.mean(np.square(deltaxe)))
 				else:
 					simplex[N] = cromosoma(xr, 0, deltaxr, 0)
-			# print "Elegido el reflejado (II): xr=",xr," MSE=",mean(square(deltaxr))
+				print("Elegido el reflejado (II): xr=", xr, " MSE=", np.mean(np.square(deltaxr)))
 			else:  # Contraccion (5)
 				xc = xo + rho * (xn1 - xo)
 				deltaxc = delta(xc, observed)
 				betterc = comparator(deltaxc, simplex[N].delta, c)
 				if betterc:
 					simplex[N] = cromosoma(xc, 0, deltaxc, 0)
-				# print "Elegido el contraido: xc=",xc," MSE=",mean(square(deltaxc))
+					print("Elegido el contraido: xc=", xc, " MSE=", np.mean(np.square(deltaxc)))
 				else:  # Reduccion (6)
-					# print "Reduccion"
 					for i in range(1, N1):
 						xi = simplex[0].genoma + sigma * (simplex[i].genoma - simplex[0].genoma)
 						deltaxi = delta(xi, observed)
 						simplex[i] = cromosoma(xi, 0, deltaxi, 0)
-	#
+
 	comparaciones, distancias = comparaciones2a2(N1, simplex, comparator, c)
 	ordenaSimplex(N1, simplex, comparaciones, distancias)
 	return simplex[0].genoma.copy()
@@ -356,15 +272,15 @@ def cruce(chr1, chr2, delta, comparator, observed, c):
 	# Calculo del fitness
 	delta1 = delta(off1, observed)
 	delta2 = delta(off2, observed)
-	# mediana del fitness
-	# m1 = median(delta1)
-	# m2 = median(delta2)
-	# for i in range(mygran):
-	#	off1[i] = off1[i] - m1
-	#	off2[i] = off2[i] - m2
-	# delta1 = delta(off1,observed)
-	# delta2 = delta(off2,observed)
-	# print median(delta1),median(delta2)
+	print("Mediana del fitness (cruce)")
+	m1 = np.median(delta1)
+	m2 = np.median(delta2)
+	for i in range(mygran):
+		off1[i] = off1[i] - m1
+		off2[i] = off2[i] - m2
+	delta1 = delta(off1,observed)
+	delta2 = delta(off2,observed)
+	print(np.median(delta1), np.median(delta2))
 	return cromosoma(off1.copy(), 99.0, delta1, 99.0), cromosoma(off2.copy(), 99.0, delta2, 99.0)
 
 
@@ -380,10 +296,13 @@ def mutacion(chr1, delta, comparator, observed, c):
 			off1[i + 2 * mygran], off2[i + 2 * mygran] = cambia(off1[i + 2 * mygran], off2[i + 2 * mygran], alpha)
 	# Calculo del fitness
 	delta1 = delta(off1, observed)
-	# m1 = median(delta1)
-	# for i in range(mygran):
-	#	off1[i] = off1[i] - m1
-	# delta1 = delta(off1,observed)
+	'''
+		To test, I don't know with it does and if its good or wrong
+	'''
+	m1 = np.median(delta1)
+	for i in range(mygran):
+		off1[i] = off1[i] - m1
+	delta1 = delta(off1,observed)
 	return cromosoma(off1.copy(), 99.0, delta1, 99.0)
 
 
@@ -414,14 +333,6 @@ def genetico(POPULATION, start, delta, comparator, observed, NITER, c):
 		comparaciones, distancias = comparaciones2a2(POPULATION, poblacion, comparator, c)
 		ordenapreferencias(POPULATION, poblacion, comparaciones, distancias)
 		#
-		# Depuracion
-		#
-		# for individual in range(POPULATION):
-		#	print individual,poblacion[individual].rank,
-		#		mean(square(poblacion[individual].delta)),
-		#		mean(square(delta(poblacion[individual].genoma,observed))),
-		#		poblacion[individual].distancia
-		#
 		# Aplicacion de operadores geneticos para formar la poblacion intermedia
 		#
 		savepoblacion = []
@@ -430,7 +341,6 @@ def genetico(POPULATION, start, delta, comparator, observed, NITER, c):
 		poblacion = []
 		# Todos los de rango cero y uno (podriamos meter toda la poblacion y entonces es NSGA-II)
 		MINRANK = 0
-		# MINRANK = POPULATION
 		poblacion.append(savepoblacion[0])
 		if gen > 0:
 			iter = 1
@@ -488,14 +398,6 @@ def genetico(POPULATION, start, delta, comparator, observed, NITER, c):
 		# Ordenacion por rangos
 		comparaciones, distancias = comparaciones2a2(len(poblacion), poblacion, comparator, c)
 		ordenapreferencias(len(poblacion), poblacion, comparaciones, distancias)
-		#
-		# Depuracion
-		#
-		print('ITER=', gen,
-			  "MSE=", mean(np.square(poblacion[0].delta)),
-			  "MAS=", mean(abs(poblacion[0].delta)),
-			  "Desc=", np.percentile(poblacion[0].delta, array([5, 95]))
-			  )
 
 		f = open('params-crisp.dat', 'w')
 		for i in range(len(poblacion[0].genoma)):
@@ -538,21 +440,24 @@ c = 0.25
 for rep in range(1):
 	prediccion = myFRBS(datos[:, 0], params[0:mygran], params[mygran:2 * mygran], params[2 * mygran:3 * mygran], mygran,
 						mydimx)
-	# print("Prediccion")
-	# print(prediccion)
-	# print("Datos")
-	# print(datos[:, 1])
 	delta = prediccion - datos[:, 1]
 	print("Numero de puntos cubiertos:", np.percentile(delta, array([5, 95])))
-	solucion = genetico(POP, params, deltacrisp, comparaMSE, datos[:, 1], NITER, c)
-	# solucion = genetico(POP,params,deltacrisp,comparaStatPref,datos[:,1],NITER,c)
-	solucion = genetico(POP, params, deltacrisp, comparaStochDom, datos[:, 1], NITER, c)
-	params = solucion
-	print("Solucion")
-	print(solucion)
+	solucion1 = genetico(POP, params, deltacrisp, comparaMSE, datos[:, 1], NITER, c)
+	solucion2 = genetico(POP,params,deltacrisp,comparaStatPref,datos[:,1],NITER,c)
+	solucion3 = genetico(POP, params, deltacrisp, comparaStochDom, datos[:, 1], NITER, c)
+	params = solucion1
+	print("Solucion 1")
+	print(solucion1)
+	print("Solucion 2")
+	print(solucion2)
+	print("Solucion 3")
+	print(solucion3)
 
+'''
+	Fix and test
+'''
 # x <- read.table("output-crisp.dat")
-# plot(x[,1],x[,2],ylim=c(min(x[,2]),max(x[,2])),xlab="independent variable",ylab="observed variable")
+# plot(x[:,1],x[:,2],ylim=c(min(x[,2]),max(x[,2])),xlab="independent variable",ylab="observed variable")
 # lines(x[,1],x[,3],col="red",lw=2)
 # z <- read.table("50sin-noiseless.dat")
 # mean((z[,2]-x[,3])**2)
