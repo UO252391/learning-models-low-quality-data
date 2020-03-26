@@ -1,3 +1,4 @@
+import math
 import random
 from cmath import isnan
 from math import exp
@@ -68,8 +69,14 @@ datostest = array(datostest)
 
 def purgeNaNs(prediccion):
 	np_prediccion = np.fromstring(prediccion)
-	where_are_NaNs = isnan(np_prediccion)
-	np_prediccion[where_are_NaNs] = 10
+	# np_prediccion = np.array(np_prediccion)
+	#nans = []
+	for i in range(np_prediccion.ndim):
+		if math.isnan(np_prediccion[i]):
+			np_prediccion[i] = 10
+			# nans.append(True)
+	#where_are_NaNs = math.isnan(np_prediccion)
+	# np_prediccion[nans] = 10
 
 
 def trans(M):
@@ -78,53 +85,53 @@ def trans(M):
 
 def myFRBS(vx, cons, baseX, sigmaX, mygran, mydimx):
 	# TODO: refactor call to see what's wrong
-	print("Argumentos: ")
-	print(vx)
-	print(cons)
-	print(baseX)
-	print(sigmaX)
-	print(mygran)
-	print(mydimx)
+	# print("Argumentos: ")
+	# print(vx)
+	# print(cons)
+	# print(baseX)
+	# print(sigmaX)
+	# print(mygran)
+	# print(mydimx)
 	tile1 = np.tile(vx, mygran) # 50 - 10
-	print(tile1.shape)
+	# print(tile1.shape)
 	shape1 = np.reshape(tile1, [mygran, mydimx]) # 10 - 50
 	transpose = trans(shape1) # 50 -10
 	tile2 = np.tile(baseX, mydimx)
 	shape2 = np.reshape(tile2, (mydimx, mygran))
-	print("Transpose")
-	print(transpose)
-	print("Shape2")
-	print(shape2.shape)
+	# print("Transpose")
+	# print(transpose)
+	# print("Shape2")
+	# print(shape2.shape)
 	res = transpose - shape2
 	activacion = np.exp(-np.square(res) / abs(sigmaX))
-	print("Activacion")
-	print(activacion)
+	# print("Activacion")
+	# print(activacion)
 	tile3 = np.tile(cons, mydimx)
 	shape3 = np.reshape(tile3, [mydimx, mygran])
 	activcons = activacion * shape3
-	print("Activcons")
-	print(activcons)
+	# print("Activcons")
+	# print(activcons)
 	sum1 = sum(activcons, 1)
 	sum11 = np.matrix(activcons)
 	sum2 = sum(activacion, 1) + 1e-6
 	sum22 = np.matrix(activacion)
-	print("Matrices")
-	print(sum11.shape)
-	print(sum22.shape)
+	# print("Matrices")
+	# print(sum11.shape)
+	# print(sum22.shape)
 	result1 = sum11.sum(axis=1) + 1
 	result2 = sum22.sum(axis=1) + 1 + 1e-6
 	#result = sum(activcons, 1) / (sum(activacion, 1) + 1e-6) ----> Original
 	result = result1 / result2
 	result = np.fromstring(result)
-	print("Result")
-	print(result)
+	# print("Result")
+	# print(result)
 	return result
 
 
 def deltacrisp(params, observed):
 	prediccion = myFRBS(datos[:, 0], params[0:mygran], params[mygran:2 * mygran], params[2 * mygran:3 * mygran], mygran,
 						mydimx)
-	#purgeNaNs(prediccion)
+	purgeNaNs(prediccion)
 	return prediccion - observed
 
 
@@ -145,9 +152,9 @@ def Kg(x, c):
 
 
 def comparaStochDom(delta1, delta2, c):
-	mejor1 = sum(Kg(delta1, c))
-	mejor2 = sum(Kg(delta2, c))
-	return mejor1 > mejor2
+	m1 = Kg(delta1, c)
+	m2 = Kg(delta2, c)
+	return m1 > m2
 
 
 def comparaMSE(delta1, delta2, c):
@@ -240,8 +247,8 @@ def optimLocal(start, delta, comparator, observed, NITER, c):
 	iter = 0
 	lastvar = 0
 	while iter <= MAXITER:
-		print(iter)
-		print(MAXITER)
+		# print(iter)
+		# print(MAXITER)
 		if iter == 0:
 			savefit = mean(np.square(simplex[0].delta))
 		if iter % 10 == 0:
@@ -250,15 +257,15 @@ def optimLocal(start, delta, comparator, observed, NITER, c):
 			# 	  np.percentile(simplex[0].delta, array([5, 95])),
 			# 	  "K=", Kg(simplex[0].delta, c), "(var", var, ")")
 		iter = iter + 1
-	print("--------------------------------------------------")
-	print("--------------------------------------------------")
-	print("------                                    --------")
-	print("------                                    --------")
-	print("------              MARCADOR              --------")
-	print("------                                    --------")
-	print("------                                    --------")
-	print("--------------------------------------------------")
-	print("--------------------------------------------------")
+	# print("--------------------------------------------------")
+	# print("--------------------------------------------------")
+	# print("------                                    --------")
+	# print("------                                    --------")
+	# print("------              MARCADOR              --------")
+	# print("------                                    --------")
+	# print("------                                    --------")
+	# print("--------------------------------------------------")
+	# print("--------------------------------------------------")
 
 	if var == lastvar:
 		print("Saliendo por varianza constante")
@@ -531,12 +538,12 @@ c = 0.25
 for rep in range(1):
 	prediccion = myFRBS(datos[:, 0], params[0:mygran], params[mygran:2 * mygran], params[2 * mygran:3 * mygran], mygran,
 						mydimx)
-	print("Prediccion")
-	print(prediccion)
-	print("Datos")
-	print(datos[:, 1])
+	# print("Prediccion")
+	# print(prediccion)
+	# print("Datos")
+	# print(datos[:, 1])
 	delta = prediccion - datos[:, 1]
-	print("Numero de puntos cubiertos:", np.percentile(delta, array([5, 95]))) #----> TODO: Percentile is not callable
+	print("Numero de puntos cubiertos:", np.percentile(delta, array([5, 95])))
 	solucion = genetico(POP, params, deltacrisp, comparaMSE, datos[:, 1], NITER, c)
 	# solucion = genetico(POP,params,deltacrisp,comparaStatPref,datos[:,1],NITER,c)
 	solucion = genetico(POP, params, deltacrisp, comparaStochDom, datos[:, 1], NITER, c)
