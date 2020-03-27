@@ -20,5 +20,5 @@ def FRBS_plot(solucion):
 	plt.title(solucion)
 	plt.xlabel("Index")
 	plt.ylabel("Value")
-	plt.show()
-	plt.savefig("..\\resources\\results\\" + solucion + ".png")
+
+	plt.savefig("..\\resources\\results\\" + solucion + ".png", bbox_inches='tight')
