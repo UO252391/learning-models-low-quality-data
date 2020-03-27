@@ -10,6 +10,5 @@ def varianza(simplex):
 	for i in range(1, len(simplex)):
 		v = v + np.square(simplex[i].genoma - xo)
 	v = 1.0 / len(simplex) * v
-	# print("v=", np.sqrt(np.dot(v, v)))
 	return np.sqrt(np.dot(v, v))
 

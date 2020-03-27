@@ -18,9 +18,6 @@ def mutacion(datos, mygran, mydimx, chr1, delta, comparator, observed, c):
 			off1[i + 2 * mygran], off2[i + 2 * mygran] = cambia(off1[i + 2 * mygran], off2[i + 2 * mygran], alpha)
 	# Calculo del fitness
 	delta1 = delta(datos, mygran, mydimx, off1, observed)
-	'''
-		To test, I don't know with it does and if its good or wrong
-	'''
 	m1 = np.median(delta1)
 	for i in range(mygran):
 		off1[i] = off1[i] - m1

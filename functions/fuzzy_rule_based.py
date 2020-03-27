@@ -3,9 +3,9 @@ from utils.matrix_transpose import trans
 
 
 def myFRBS(vx, cons, baseX, sigmaX, mygran, mydimx):
-	tile1 = np.tile(vx, mygran)  # 50 - 10
-	shape1 = np.reshape(tile1, [mygran, mydimx])  # 10 - 50
-	transpose = trans(shape1)  # 50 -10
+	tile1 = np.tile(vx, mygran)
+	shape1 = np.reshape(tile1, [mygran, mydimx])
+	transpose = trans(shape1)
 	tile2 = np.tile(baseX, mydimx)
 	shape2 = np.reshape(tile2, (mydimx, mygran))
 	res = transpose - shape2

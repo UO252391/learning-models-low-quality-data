@@ -53,7 +53,6 @@ def genetico(datos, mygran, mydimx, POPULATION, start, delta, comparator, observ
 				iter = iter + 1
 				if iter >= len(savepoblacion):
 					break
-		# print("Conservamos ", len(poblacion))
 		# Aplicacion de operadores
 		PRMUTA = 0.05
 		while len(poblacion) < POPULATION:
@@ -84,7 +83,6 @@ def genetico(datos, mygran, mydimx, POPULATION, start, delta, comparator, observ
 				del poblacion[posicion + 1]
 				eliminados = eliminados + 1
 			posicion = posicion + 1
-		# print("Eliminados", eliminados)
 		# Rellenamos con aleatorios si hiciese falta
 		while len(poblacion) < POPULATION:
 			ge = randomcr(mygran, mydimx)
@@ -103,7 +101,6 @@ def genetico(datos, mygran, mydimx, POPULATION, start, delta, comparator, observ
 		comparaciones, distancias = comparaciones2a2(len(poblacion), poblacion, comparator, c)
 		ordenapreferencias(len(poblacion), poblacion, comparaciones, distancias)
 
-		# f = open('params-crisp.dat', 'w')
 		f = open('..\\resources\\results\\params-crisp.csv', 'w')
 		for i in range(len(poblacion[0].genoma)):
 			f.write(str(poblacion[0].genoma[i]) + '\n')
@@ -111,16 +108,9 @@ def genetico(datos, mygran, mydimx, POPULATION, start, delta, comparator, observ
 		prediccion = myFRBS(datos[:, 0], poblacion[0].genoma[0:mygran],
 							poblacion[0].genoma[mygran:2 * mygran],
 							poblacion[0].genoma[2 * mygran:3 * mygran], mygran, mydimx)
-		# f = open('output-crisp.dat', 'w')
 		f = open('..\\resources\\results\\output-crisp.csv', 'w')
 		f.write('Index;Original;Prediction\n')
 		for i in range(len(prediccion)):
 			f.write(str(datos[i, 0]) + ';' + str(datos[i, 1]) + ';' + str(prediccion[i]) + '\n')
 		f.close()
-	# Un global por si interrumpimos el aprendizaje
-	# for individual in range(POPULATION):
-	#	print(individual, poblacion[individual].rank, mean(square(poblacion[individual].delta)), end=' ')
-	#	mean(square(delta(poblacion[individual].genoma,observed))),
-	#	poblacion[individual].distancia
-	# Se guardan a disco parametros y prediccion
 	return poblacion[0].genoma

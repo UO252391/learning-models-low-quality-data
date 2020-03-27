@@ -34,13 +34,10 @@ def optimLocal(datos, mygran, mydimx, start, delta, comparator, observed, NITER,
 			savefit = mean(np.square(simplex[0].delta))
 		if iter % 10 == 0:
 			var = varianza(simplex)
-		# print("     ** it=", iter, "bst=", mean(np.square(simplex[0].delta)), "Descub=",
-		# 	  np.percentile(simplex[0].delta, array([5, 95])),
-		# 	  "K=", Kg(simplex[0].delta, c), "(var", var, ")")
+
 		iter = iter + 1
 
 	if var == lastvar:
-		# print("Saliendo por varianza constante")
 		MAXITER = iter - 1
 		lastvar = var
 		if iter == MAXITER and var > 0.05 and MAXITER < 400:
@@ -68,7 +65,6 @@ def optimLocal(datos, mygran, mydimx, start, delta, comparator, observed, NITER,
 		betterbst = comparator(deltaxr, simplex[0].delta, c)
 		if better2w and not betterbst:
 			simplex[N] = cromosoma(xr, 0, deltaxr, 0)
-		# print("Elegido el reflejado: xr=", xr, " MSE=", np.mean(np.square(deltaxr)))
 		else:
 			if betterbst:  # Expansion (4)
 				xe = xr + gamma * (xr - xo)
@@ -76,17 +72,14 @@ def optimLocal(datos, mygran, mydimx, start, delta, comparator, observed, NITER,
 				bettere = comparator(deltaxe, deltaxr, c)
 				if bettere:
 					simplex[N] = cromosoma(xe, 0, deltaxe, 0)
-				# print("Elegido el expandido: xe=", xe, " MSE=", np.mean(np.square(deltaxe)))
 				else:
 					simplex[N] = cromosoma(xr, 0, deltaxr, 0)
-			# print("Elegido el reflejado (II): xr=", xr, " MSE=", np.mean(np.square(deltaxr)))
 			else:  # Contraccion (5)
 				xc = xo + rho * (xn1 - xo)
 				deltaxc = delta(xc, observed)
 				betterc = comparator(deltaxc, simplex[N].delta, c)
 				if betterc:
 					simplex[N] = cromosoma(xc, 0, deltaxc, 0)
-				# print("Elegido el contraido: xc=", xc, " MSE=", np.mean(np.square(deltaxc)))
 				else:  # Reduccion (6)
 					for i in range(1, N1):
 						xi = simplex[0].genoma + sigma * (simplex[i].genoma - simplex[0].genoma)

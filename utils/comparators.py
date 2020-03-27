@@ -34,7 +34,6 @@ def comparaciones2a2(POPULATION, poblacion, comparator, c):
 	comparaciones = np.zeros([POPULATION, POPULATION])
 	distancias = np.zeros([POPULATION, POPULATION])
 	for individual in range(POPULATION):
-		# print("ECM(", individual, ")=", np.mean(np.square(poblacion[individual].delta)))
 		for ind2 in range(individual, POPULATION):
 			comparaciones[ind2, individual] = comparator(poblacion[individual].delta, poblacion[ind2].delta, c)
 			comparaciones[individual, ind2] = comparator(poblacion[ind2].delta, poblacion[individual].delta, c)
