@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 
-def FRBS_plot(solucion):
+def  FRBS_plot(solucion):
 	output_crisp = pd.read_csv("..\\resources\\results\\output-crisp.csv", sep=";",
 							   names=['Index', 'Original', 'Prediction'])
 
