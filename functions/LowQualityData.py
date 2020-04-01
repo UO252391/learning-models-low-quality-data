@@ -23,7 +23,6 @@ class LowQualityData():
 		self.params = np.zeros([self.NUMPAR])
 		self.title = title
 
-	# TODO: modificar el metodo genetico para que almacene y retorne la lista
 	def fit(self, datos, comparador):
 		# Limpiamos los arrays
 		self.poblacion_ajuste.clear()
