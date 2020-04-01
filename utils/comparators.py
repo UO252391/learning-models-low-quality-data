@@ -1,11 +1,5 @@
-from numpy.core._multiarray_umath import array
 import numpy as np
-
-
-def comparaStatPref(delta1, delta2, c):
-	mejor1 = sum(abs(delta1) < abs(delta2))
-	mejor2 = sum(abs(delta2) < abs(delta1))
-	return mejor1 > mejor2
+from numpy.core._multiarray_umath import array
 
 
 def K(x, c):
@@ -16,6 +10,12 @@ def K(x, c):
 def Kg(x, c):
 	t = np.exp(-np.square(x / c))
 	return sum(t)
+
+
+def comparaStatPref(delta1, delta2, c):
+	mejor1 = sum(abs(delta1) < abs(delta2))
+	mejor2 = sum(abs(delta2) < abs(delta1))
+	return mejor1 > mejor2
 
 
 def comparaStochDom(delta1, delta2, c):

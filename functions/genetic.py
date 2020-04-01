@@ -1,13 +1,14 @@
 import random
+
 import numpy as np
+
 from functions.chromosome import cromosoma
-from utils.randomcr import randomcr
-from utils.comparators import comparaciones2a2
-from utils.sort import ordenapreferencias
-from functions.optimize import optimLocal
-from functions.fuzzy_rule_based import myFRBS
-from functions.mutation import mutacion
 from functions.cross import cruce
+from functions.mutation import mutacion
+from functions.optimize import optimLocal
+from utils.comparators import comparaciones2a2
+from utils.randomcr import randomcr
+from utils.sort import ordenapreferencias
 
 
 def genetico(datos, mygran, mydimx, POPULATION, start, delta, comparator, observed, NITER, c):
@@ -19,6 +20,7 @@ def genetico(datos, mygran, mydimx, POPULATION, start, delta, comparator, observ
 	SIZEOUTPUT = len(observed)
 	NLOCAL = 100
 	MEMETICO = 2
+	results = []
 	#
 	# Inicializacion de la poblacion inicial
 	#
@@ -105,12 +107,14 @@ def genetico(datos, mygran, mydimx, POPULATION, start, delta, comparator, observ
 		for i in range(len(poblacion[0].genoma)):
 			f.write(str(poblacion[0].genoma[i]) + '\n')
 		f.close()
-		prediccion = myFRBS(datos[:, 0], poblacion[0].genoma[0:mygran],
-							poblacion[0].genoma[mygran:2 * mygran],
-							poblacion[0].genoma[2 * mygran:3 * mygran], mygran, mydimx)
-		f = open('..\\resources\\results\\output-crisp.csv', 'w')
-		f.write('Index;Original;Prediction\n')
-		for i in range(len(prediccion)):
-			f.write(str(datos[i, 0]) + ';' + str(datos[i, 1]) + ';' + str(prediccion[i]) + '\n')
-		f.close()
-	return poblacion[0].genoma
+		# prediccion = myFRBS(datos[:, 0], poblacion[0].genoma[0:mygran],
+		# 					poblacion[0].genoma[mygran:2 * mygran],
+		# 					poblacion[0].genoma[2 * mygran:3 * mygran], mygran, mydimx)
+		# f = open('..\\resources\\results\\output-crisp.csv', 'w')
+		# f.write('Index;Original;Prediction\n')
+		# for i in range(len(prediccion)):
+		# 	f.write(str(datos[i, 0]) + ';' + str(datos[i, 1]) + ';' + str(prediccion[i]) + '\n')
+		# f.close()
+		results.append(poblacion[0])
+	# return poblacion[0].genoma
+	return results
