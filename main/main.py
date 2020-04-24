@@ -51,7 +51,7 @@ datostrain = array(datostrain)
 # -----------------------------------------------#
 # -----------------------------------------------#
 
-modelo = LowQualityData.LowQualityData(c=0.20)
+modelo = LowQualityData.LowQualityData()
 modelo.setLabel("comparaStochDom")
 # -----------------------------------------------#
 # -----------------------------------------------#

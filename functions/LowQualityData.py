@@ -86,8 +86,6 @@ class LowQualityData():
 
 		f = open('..\\resources\\results\\output-crisp.csv', 'w')
 		f.write('Index;Original;Prediction;Adjust\n')
-		print("PREDICHO")
-		print(predicho)
 		for i in range(len(self.prediccion) - 1):
 			f.write(str(self.datos[i, 0]) + ';' + str(self.original[i, 1]) + ';' + str(self.prediccion[i]) + ';' + str(
 				predicho[i]) + '\n')
