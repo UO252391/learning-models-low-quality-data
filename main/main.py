@@ -1,5 +1,9 @@
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error
+
 from functions import LowQualityData
 from utils.comparators import *
+
 # -----------------------------------------------#
 # -----------------------------------------------#
 # -----------     DATA LOADING     --------------#
@@ -47,8 +51,8 @@ datostrain = array(datostrain)
 # -----------------------------------------------#
 # -----------------------------------------------#
 
-modelo = LowQualityData.LowQualityData()
-modelo.setLabel("comparaMSE")
+modelo = LowQualityData.LowQualityData(c=0.20)
+modelo.setLabel("comparaStochDom")
 # -----------------------------------------------#
 # -----------------------------------------------#
 # -----------      FIT MODEL       --------------#
@@ -62,6 +66,25 @@ modelo.fit(datostrain, comparaMSE)
 # -----------------------------------------------#
 # -----------------------------------------------#
 resultado = modelo.predict(datos)
+ajuste = modelo.adjust(10)
 
-print("\n-- Resultados--\n")
-print(resultado)
+regressor = RandomForestRegressor()
+regressor.fit(datostrain, datostrain[:, 1])
+
+rf_result = regressor.predict(datos)
+
+mse_rf = mse = mean_squared_error(datostrain[:, 1], rf_result)
+
+mse1 = modelo.mse(datostrain[:, 1], resultado)
+mse2 = modelo.mse(datostrain[:, 1], ajuste)
+
+print("Error cuadratico medio FRBS: {0}".format(mse1))
+print("Error cuadratico medio FRBS (ajuste): {0}".format(mse2))
+print("Error cuadratico medio RF: {0}".format(mse_rf))
+
+modelo.save()
+print("\n-- Valores reales --\n")
+print(datostrain)
+
+print("\n-- Resultados tras ajuste--\n")
+print(ajuste)
